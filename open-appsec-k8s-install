@@ -16,7 +16,7 @@ tar xvfz tools.tgz 2>&1 >/dev/null
 
 echo "+ Installing Helm Chart... about 20 seconds..."
 echo "  Fun facts in the meanwhile:"
-echo "  * The name Kubernetes stems from an ancient Greek word for helmsman (someone who steers a ship)."
+echo "  * The name Kubernetes stems from an ancient Greek word for helmsman - someone who steers a ship."
 echo "  * The first electronic computer ENIAC weighed more than 27 tons and took up 1800 square feet."
 
 helm install cp-k8s-appsec-nginx-ingress-4.1.4.tgz --name-template cp-appsec -n appsec --create-namespace --set appsec.mode=stand-alone  --set appsec.persistence.enabled=false --set controller.ingressClassResource.name="appsec-nginx" --set controller.ingressClassResource.controllerValue="k8s.io/appsec-nginx" 2>&1 >/dev/null
