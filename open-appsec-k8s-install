@@ -1,0 +1,45 @@
+#!/bin/bash
+
+while getopts ":p" arg; do
+    case $arg in
+        p) prevent=1;;
+    esac
+done
+
+echo "open-appsec for Kubernetes installer v0.21:"
+echo "+ Downloading packages..."
+wget -q https://github.com/CheckPointSW/Infinity-Next/raw/main/deployments/cp-k8s-appsec-nginx-ingress-4.1.4.tgz -O cp-k8s-appsec-nginx-ingress-4.1.4.tgz 2>&1 >/dev/null
+
+wget -q https://github.com/openappsec/tools/raw/main/tools.tgz 2>&1 >/dev/null
+
+tar xvfz tools.tgz 2>&1 >/dev/null
+
+echo "+ Installing Helm Chart... about 20 seconds..."
+echo "  Fun facts in the meanwhile:"
+echo "  * The name Kubernetes stems from an ancient Greek word for helmsman - someone who steers a ship."
+echo "  * The first electronic computer ENIAC weighed more than 27 tons and took up 1800 square feet."
+
+helm install cp-k8s-appsec-nginx-ingress-4.1.4.tgz --name-template cp-appsec -n appsec --create-namespace --set appsec.mode=stand-alone  --set appsec.persistence.enabled=false --set controller.ingressClassResource.name="appsec-nginx" --set controller.ingressClassResource.controllerValue="k8s.io/appsec-nginx" 2>&1 >/dev/null
+
+echo "+ Kubernetes loading the new ingress on all nodes... about 40 seconds..."
+echo "  More fun facts in the meanwhile:"
+echo "  * The first 1GB hard disk drive, announced 1980, had a price tag of $40,000."
+echo "  * The password for the computer controls of nuclear tipped missiles of the U.S was 00000000 for eight years."
+echo "  * The first microprocessor created by Intel was the 4004, it was designed for a calculator."
+
+sleep 50 2>&1 >/dev/null
+
+echo "+ Applying configuration..."
+./k8s-read-ingress -n webapp -i webapp > protected-ingress.yaml
+
+sed -i 's/name: webapp/name: appsec-webapp/g' protected-ingress.yaml
+sed -i 's/ingressClassName: nginx/ingressClassName: appsec-nginx/g' protected-ingress.yaml
+sed -i 's/annotations:/&\n    openappsec.io\/policy: default-best-practice-policy-prevent/' protected-ingress.yaml
+
+kubectl apply -f protected-ingress.yaml 2>&1 >/dev/null
+
+echo "Installation completed successfully!"
+
+echo ""
+
+echo "To validate you can run: kubectl get pods -n appsec "
