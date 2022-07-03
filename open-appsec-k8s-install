@@ -27,12 +27,12 @@ echo "  * The password for the computer controls of nuclear tipped missiles of t
 echo "  * The first microprocessor created by Intel was the 4004, it was designed for a calculator."
 echo "  * Nearly 22 percent of people think that Kubernetes can make coffee."
 echo "  * The Canary Islands are named after dogs, not birds, from the Latin phrase Canariae Insulae - island of dogs."
-echo "  * The longest place name on Earth is in New Zealand, 85 letters - Taumatawhakatangihanga-koauauotamateaturipukakapikimaung-ahoronukupokaiwhenuakitanatahu."
+echo "  * The longest place name on Earth is in New Zealand, 85 chars - Taumatawhakatangihanga-koauauotamateaturipukakapikimaung-ahoronukupokaiwhenuakitanatahu."
 echo "  * Around one in every 200 men are direct descendants of Genghis Khan."
 echo "  * Pineapples take two years to grow."
 echo "  * The first electronic computer ENIAC weighed more than 27 tons and took up 1800 square feet."
 
-sleep 50 2>&1 >/dev/null
+sleep 40 2>&1 >/dev/null
 
 echo "+ Applying configuration..."
 ./k8s-read-ingress -n webapp -i webapp > protected-ingress.yaml
@@ -42,6 +42,8 @@ sed -i 's/ingressClassName: nginx/ingressClassName: appsec-nginx/g' protected-in
 sed -i 's/annotations:/&\n    openappsec.io\/policy: default-best-practice-policy-prevent/' protected-ingress.yaml
 
 kubectl apply -f protected-ingress.yaml 2>&1 >/dev/null
+
+sleep 15 2>&1 >/dev/null
 
 echo "Installation completed successfully!"
 
