@@ -15,17 +15,22 @@ wget -q https://github.com/openappsec/tools/raw/main/tools.tgz 2>&1 >/dev/null
 tar xvfz tools.tgz 2>&1 >/dev/null
 
 echo "+ Installing Helm Chart... about 20 seconds..."
-echo "  Fun facts in the meanwhile:"
-echo "  * The name Kubernetes stems from an ancient Greek word for helmsman - someone who steers a ship."
-echo "  * The first electronic computer ENIAC weighed more than 27 tons and took up 1800 square feet."
+echo "  Just enough time for a very short nap or mediation..."
 
 helm install cp-k8s-appsec-nginx-ingress-4.1.4.tgz --name-template cp-appsec -n appsec --create-namespace --set appsec.mode=stand-alone  --set appsec.persistence.enabled=false --set controller.ingressClassResource.name="appsec-nginx" --set controller.ingressClassResource.controllerValue="k8s.io/appsec-nginx" 2>&1 >/dev/null
 
 echo "+ Kubernetes loading the new ingress on all nodes... about 40 seconds..."
-echo "  More fun facts in the meanwhile:"
+echo "  Some fun facts in the meanwhile:"
+echo "  * The name Kubernetes stems from an ancient Greek word for helmsman - someone who steers a ship."
 echo "  * The first 1GB hard disk drive, announced 1980, had a price tag of 40,000 USD."
 echo "  * The password for the computer controls of nuclear tipped missiles of the U.S was 00000000 for eight years."
 echo "  * The first microprocessor created by Intel was the 4004, it was designed for a calculator."
+echo "  * Nearly 22 percent of people think that Kubernetes can make coffee."
+echo "  * The Canary Islands are named after dogs, not birds, from the Latin phrase Canariae Insulae - island of dogs."
+echo "  * The longest place name on the planet is in New Zealan - it is 85 letters long - Taumatawhakatangihanga-koauauotamateaturipukakapikimaung-ahoronukupokaiwhenuakitanatahu."
+echo "  * Around one in every 200 men are direct descendants of Genghis Khan."
+echo "  * Pineapples take two years to grow."
+echo "  * The first electronic computer ENIAC weighed more than 27 tons and took up 1800 square feet."
 
 sleep 50 2>&1 >/dev/null
 
