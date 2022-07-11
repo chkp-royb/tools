@@ -1,0 +1,137 @@
+#!/bin/bash
+
+echo "open-appsec for Kubernetes Ingress Installer v1.2228"
+echo ""
+
+if [ $(kubectl get ing -A | wc -l) -le 1 ];
+then
+   echo "This environment has no Kubernetes ingress. Exiting (Error 1)."
+   exit 1
+fi
+
+echo ">> Ingress (step 1 of 3)"
+
+echo "Existing Ingresses:"
+kubectl get ing -A
+echo ""
+echo "Options:"
+echo "1. Duplicate an existing Ingress and add open-asppsec to it (existing and new ingresses will run side-by-side)" 
+echo "2. Add open-appsec to an existing Ingress resource"
+
+while [ 1 ]
+do
+    echo -n "[open-appsec/install/ingress] Select [1]: "
+    read -r input
+
+    newingress=0
+    if [[ "$input" == ""  || "$input" == "1" ]];
+    then
+      newingress=1
+      verb=duplicate
+    elif [ "$input" == "2" ];
+    then
+      newingress=2
+      verb=add
+    fi  
+     
+    if [ $newingress -ge 1 ];
+    then
+      ingress_suggestion=$(kubectl get ing -A -o json | jq '.items[] | .metadata["name"]' | sed -e 's/^"//' -e 's/"$//')
+      namespace_suggestion=$(kubectl get ing -A -o json | jq '.items[] | .metadata["namespace"]' | sed -e 's/^"//' -e 's/"$//')
+  
+      valid=1
+      while [ $valid -ne 0 ]; do
+          
+          echo -n "[open-appsec/install/ingress/$verb] Enter existing Ingress name [$ingress_suggestion]: "
+          read -r ingress
+          if [ "$ingress" == "" ];
+          then
+              ingress=$ingress_suggestion
+          fi
+          
+          echo -n "[open-appsec/install/ingress/$verb] Enter existing Ingress namespace [$namespace_suggestion]: "
+          read -r namespace
+          if [ "$namespace" == "" ];
+          then
+              namespace=$namespace_suggestion
+          fi      
+          
+          kubectl get ing $ingress -n $namespace 2>&1 >/dev/null
+          valid=$?
+      done
+
+      # Export ingress to a file  
+      kubectl get ingress $ingress -n $namespace -o json | jq 'del(.metadata.resourceVersion,.metadata.uid,.metadata.selfLink,.metadata.creationTimestamp,.status,.metadata.generation,.metadata.ownerReferences)' | yq eval - -P  > ingress.yaml 
+         
+      grep "ingressClassName: nginx" ingress.yaml 2>&1 >/dev/null
+      if [ $? -gt 0 ];
+        then
+        echo "Ingress type is not supported by this automatic tool. Please refer to the documenation. Exiting (Error 2)."
+        exit
+      fi
+      
+      sed -i 's/ingressClassName: nginx/ingressClassName: appsec-nginx/g' ingress.yaml
+       
+      
+      # Change name only if it's a duplicated Ingress
+      if [ $newingress -eq 1 ];
+      then
+           sed -i "s/name: $ingress/name: $ingress-appsec/g" ingress.yaml
+      fi
+      
+      break
+    fi    
+done
+
+wget -q https://github.com/CheckPointSW/Infinity-Next/raw/main/deployments/cp-k8s-appsec-nginx-ingress-4.1.4.tgz -O cp-k8s-appsec-nginx-ingress-4.1.4.tgz 2>&1 >/dev/null 
+
+wget -q https://github.com/openappsec/tools/raw/main/tools.tgz 2>&1 >/dev/null
+
+tar xzf tools.tgz 2>&1 >/dev/null
+
+echo ""
+echo ">> Policy (step 2 of 3)"
+echo "You can use the default policy or change it."
+
+./open-appsec --config
+
+#Update policy name in ingress.yaml
+policyname=$(yq e 'select(.kind == "Policy").metadata.name' open-appsec-policy.yaml)
+sed -i "s/annotations:/&\n    openappsec.io\/policy: $policyname/" ingress.yaml      
+
+
+echo ""
+echo ">> Run the following commands to apply the configuration (Step 3 of 3):"
+echo "helm install cp-k8s-appsec-nginx-ingress-4.1.4.tgz --name-template cp-appsec -n $namespace --create-namespace --set appsec.mode=stand-alone  --set appsec.persistence.enabled=false --set controller.ingressClassResource.name=\"appsec-nginx\" --set controller.ingressClassResource.controllerValue=\"k8s.io/appsec-nginx\""
+echo "...wait about one minute for resources to load..."
+echo "kubectl apply -f ingress.yaml"
+echo "kubectl apply -f open-appsec-policy.yaml"
+echo ""
+
+while [ 1 ]
+do
+    echo -n "Run now (yes/no)? "
+    read -r input
+
+    if [ "$input" == "yes" ];
+    then
+      helm install cp-k8s-appsec-nginx-ingress-4.1.4.tgz --name-template cp-appsec -n $namespace --create-namespace --set appsec.mode=stand-alone  --set appsec.persistence.enabled=false --set controller.ingressClassResource.name="appsec-nginx" --set controller.ingressClassResource.controllerValue="k8s.io/appsec-nginx"
+      sleep 50
+      kubectl apply -f ingress.yaml
+      sleep 10
+      kubectl apply -f open-appsec.yaml
+      break
+    elif [ "$input" == "no" ];
+    then
+      echo "You can run the commands yourself any time."
+      break
+    fi
+done
+
+echo ""
+echo "Installation completed!"
+
+
+
+
+
