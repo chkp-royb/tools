@@ -87,6 +87,9 @@ wget -q https://github.com/CheckPointSW/Infinity-Next/raw/main/deployments/cp-k8
 
 wget -q https://github.com/openappsec/tools/raw/main/tools.tgz 2>&1 >/dev/null
 
+wget -q https://github.com/openappsec/tools/raw/main/open-appsec 2>&1 >/dev/null
+chmod +x open-appsec
+
 tar xzf tools.tgz 2>&1 >/dev/null
 
 echo ""
