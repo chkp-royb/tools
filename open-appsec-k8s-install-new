@@ -15,7 +15,7 @@ echo "Existing Ingresses:"
 kubectl get ing -A
 echo ""
 echo "Options:"
-echo "1. Duplicate an existing Ingress and add open-asppsec to it (existing and new ingresses will run side-by-side)" 
+echo "1. Duplicate an existing Ingress and add open-appsec to it (existing and new ingresses will run side-by-side)" 
 echo "2. Add open-appsec to an existing Ingress resource"
 
 while [ 1 ]
