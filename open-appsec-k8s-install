@@ -16,6 +16,9 @@ then
    exit 1
 fi
 
+echo "The installer will generate HELM charts/manifests (YAMLs) and you will be able to review and/or deploy them."
+echo ""
+
 echo ">> Ingress (step 1 of 3)"
 
 echo "Existing Ingresses:"
