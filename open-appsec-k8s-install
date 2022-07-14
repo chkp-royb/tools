@@ -115,7 +115,7 @@ while [ 1 ]
 do
     echo -n "Run now ([yes]/no)? "
     read -r input
-
+    
     if [[ "$input" == ""  || "$input" == "yes" ]];
     then
       echo "Installing open-appsec helm. It will take about 40 seconds for everything to load..."
