@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "open-appsec for Kubernetes Ingress Installer v1.2228"
+echo "open-appsec for Kubernetes Ingress Installer v1.2228.1"
 echo ""
 
 if [ $(kubectl get ing -A | wc -l) -le 1 ];
@@ -113,10 +113,10 @@ echo ""
 
 while [ 1 ]
 do
-    echo -n "Run now (yes/no)? "
+    echo -n "Run now ([yes]/no)? "
     read -r input
 
-    if [ "$input" == "yes" ];
+    if if [[ "$input" == ""  || "$input" == "yes" ]];
     then
       echo "Installing open-appsec helm. It will take about 40 seconds for everything to load..."
       helm install cp-k8s-appsec-nginx-ingress-4.1.4.tgz --name-template cp-appsec -n $namespace --create-namespace --set appsec.mode=stand-alone  --set appsec.persistence.enabled=false --set controller.ingressClassResource.name="appsec-nginx" --set controller.ingressClassResource.controllerValue="k8s.io/appsec-nginx"
