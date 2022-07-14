@@ -3,6 +3,13 @@
 echo "open-appsec for Kubernetes Ingress Installer v1.2228.1"
 echo ""
 
+if [ "$1" == "--prevent" ];
+then
+  prevent="--prevent"
+else
+  prevent=""
+fi
+
 if [ $(kubectl get ing -A | wc -l) -le 1 ];
 then
    echo "This environment has no Kubernetes ingress. Exiting (Error 1)."
@@ -96,7 +103,7 @@ echo ""
 echo ">> Policy (step 2 of 3)"
 echo "You can use the default policy or change it."
 
-./open-appsec --config
+./open-appsec --config $prevent
 
 #Update policy name in ingress.yaml
 policyname=$(yq e 'select(.kind == "Policy").metadata.name' open-appsec-policy.yaml)
