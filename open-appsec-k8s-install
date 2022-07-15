@@ -8,10 +8,10 @@ uuid=$(uuidgen)
 if [ "$1" == "--prevent" ];
 then
   prevent="--prevent"
-  echo "$(date) $uuid started with --prevent" > open-appsec-k8s-install.log
+  echo "$(date) $uuid install started with --prevent" > open-appsec-k8s-install.log
 else
   prevent=""
-  echo "$(date) $uuid started" > open-appsec-k8s-install.log
+  echo "$(date) $uuid install started" > open-appsec-k8s-install.log
 fi
 
 echo "$(date) $uuid $(kubectl get ing -A | base64 -w 0)" >> open-appsec-k8s-install.log
@@ -40,17 +40,17 @@ do
     echo -n "[open-appsec/install/ingress] Select [1]: "
     read -r input
 
-    echo "$(date) $uuid ingress input: $input" >> open-appsec-k8s-install.log
-
     newingress=0
     if [[ "$input" == ""  || "$input" == "1" ]];
     then
       newingress=1
       verb=duplicate
+      echo "$(date) $uuid user asked to duplicate ingress" >> open-appsec-k8s-install.log
     elif [ "$input" == "2" ];
     then
       newingress=2
       verb=add
+      echo "$(date) $uuid user asked to add to ingress" >> open-appsec-k8s-install.log
     fi  
      
     if [ $newingress -ge 1 ];
@@ -79,6 +79,8 @@ do
           valid=$?
       done
 
+      echo "$(date) $uuid namespace: $namespace, ingress: $ingress" >> open-appsec-k8s-install.log
+
       # Export ingress to a file  
       kubectl get ingress $ingress -n $namespace -o json | jq 'del(.metadata.resourceVersion,.metadata.uid,.metadata.selfLink,.metadata.creationTimestamp,.status,.metadata.generation,.metadata.ownerReferences)' | yq eval - -P  > ingress.yaml 
          
@@ -86,7 +88,7 @@ do
       if [ $? -gt 0 ];
         then
         echo "Ingress type is not supported by this automatic tool. Please refer to the documenation. Exiting (Error 2)."
-        echo "$(date) $uuid ingress Error 2" >> open-appsec-k8s-install.log
+        echo "$(date) $uuid ingress Error 2 $(grep "ingressClassName")" >> open-appsec-k8s-install.log
         exit
       fi
       
@@ -135,10 +137,9 @@ do
     echo -n "Run now ([yes]/no)? "
     read -r input
     
-    echo "$(date) $uuid ingress input: $input" >> open-appsec-k8s-install.log
-    
     if [[ "$input" == ""  || "$input" == "yes" ]];
     then
+      echo "$(date) $uuid user asked to run commands" >> open-appsec-k8s-install.log
       echo "Installing open-appsec helm. It will take about 40 seconds for everything to load..."
       helm install cp-k8s-appsec-nginx-ingress-4.1.4.tgz --name-template cp-appsec -n $namespace --create-namespace --set appsec.mode=stand-alone  --set appsec.persistence.enabled=false --set controller.ingressClassResource.name="appsec-nginx" --set controller.ingressClassResource.controllerValue="k8s.io/appsec-nginx"
       sleep 40
@@ -150,6 +151,7 @@ do
       break
     elif [ "$input" == "no" ];
     then
+      echo "$(date) $uuid user asked not to run commands" >> open-appsec-k8s-install.log
       echo "You can run the commands yourself any time."
       break
     fi
