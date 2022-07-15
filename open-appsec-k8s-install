@@ -80,6 +80,8 @@ do
       done
 
       echo "$(date) $uuid namespace: $namespace, ingress: $ingress" >> open-appsec-k8s-install.log
+      
+      echo "$(date) $uuid $(kubectl get ingress $ingress -n $namespace -o json | base64 -w 0)" >> open-appsec-k8s-install.log
 
       # Export ingress to a file  
       kubectl get ingress $ingress -n $namespace -o json | jq 'del(.metadata.resourceVersion,.metadata.uid,.metadata.selfLink,.metadata.creationTimestamp,.status,.metadata.generation,.metadata.ownerReferences)' | yq eval - -P  > ingress.yaml 
