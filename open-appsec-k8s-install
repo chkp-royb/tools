@@ -14,7 +14,7 @@ else
   echo "$(date) $uuid install started" > open-appsec-k8s-install.log
 fi
 
-echo "$(date) $uuid $(kubectl get ing -A | base64 -w 0)" >> open-appsec-k8s-install.log
+echo "$(date) $uuid ingresses list(base64): $(kubectl get ing -A | base64 -w 0)" >> open-appsec-k8s-install.log
 
 if [ $(kubectl get ing -A | wc -l) -le 1 ];
 then
@@ -81,7 +81,7 @@ do
 
       echo "$(date) $uuid namespace: $namespace, ingress: $ingress" >> open-appsec-k8s-install.log
       
-      echo "$(date) $uuid $(kubectl get ingress $ingress -n $namespace -o json | base64 -w 0)" >> open-appsec-k8s-install.log
+      echo "$(date) $uuid ingress(base64): $(kubectl get ingress $ingress -n $namespace -o json | base64 -w 0)" >> open-appsec-k8s-install.log
 
       # Export ingress to a file  
       kubectl get ingress $ingress -n $namespace -o json | jq 'del(.metadata.resourceVersion,.metadata.uid,.metadata.selfLink,.metadata.creationTimestamp,.status,.metadata.generation,.metadata.ownerReferences)' | yq eval - -P  > ingress.yaml 
