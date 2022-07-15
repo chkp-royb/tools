@@ -3,16 +3,23 @@
 echo "open-appsec for Kubernetes Ingress Installer v1.2228.1"
 echo ""
 
+uuid=$(uuidgen)
+
 if [ "$1" == "--prevent" ];
 then
   prevent="--prevent"
+  echo "$(date) $uuid started with --prevent" > open-appsec-k8s-install.log
 else
   prevent=""
+  echo "$(date) $uuid started" > open-appsec-k8s-install.log
 fi
+
+echo "$(date) $uuid $(kubectl get ing -A)" >> open-appsec-k8s-install.log
 
 if [ $(kubectl get ing -A | wc -l) -le 1 ];
 then
    echo "This environment has no Kubernetes ingress. Exiting (Error 1)."
+   echo "$(date) $uuid Error 1" >> open-appsec-k8s-install.log
    exit 1
 fi
 
@@ -32,6 +39,8 @@ while [ 1 ]
 do
     echo -n "[open-appsec/install/ingress] Select [1]: "
     read -r input
+
+    echo "$(date) $uuid ingress input: $(input)" >> open-appsec-k8s-install.log
 
     newingress=0
     if [[ "$input" == ""  || "$input" == "1" ]];
