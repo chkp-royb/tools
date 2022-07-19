@@ -123,7 +123,7 @@ echo "You can use the default policy or change it."
 
 
 
-HELMCHART=open-appsec-policy-helm.tgz
+HELMCHART=./open-appsec-policy-helm.tgz
 
 echo ""
 echo ">> Run the following commands to apply the configuration (Step 3 of 3):"
