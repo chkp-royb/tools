@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "open-appsec for Kubernetes Ingress Installer v1.2228.1"
+echo "open-appsec for Kubernetes Ingress Installer v1.2229.1"
 echo ""
 
 uuid=$(uuidgen)
