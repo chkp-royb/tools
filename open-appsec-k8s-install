@@ -121,17 +121,27 @@ echo "You can use the default policy or change it."
 
 ./open-appsec --config $prevent
 
-#Update policy name in ingress.yaml
-policyname=$(yq e 'select(.kind == "Policy").metadata.name' open-appsec-policy.yaml)
-sed -i "s/annotations:/&\n    openappsec.io\/policy: $policyname/" ingress.yaml      
 
+
+HELMCHART=open-appsec-policy-helm.tgz
 
 echo ""
 echo ">> Run the following commands to apply the configuration (Step 3 of 3):"
 echo "helm install cp-k8s-appsec-nginx-ingress-4.1.4.tgz --name-template cp-appsec -n $namespace --create-namespace --set appsec.mode=stand-alone  --set appsec.persistence.enabled=false --set controller.ingressClassResource.name=\"appsec-nginx\" --set controller.ingressClassResource.controllerValue=\"k8s.io/appsec-nginx\""
 echo "...wait about one minute for resources to load..."
 echo "kubectl apply -f ingress.yaml"
-echo "kubectl apply -f open-appsec-policy.yaml"
+
+if test -f "$HELMCHART";
+then
+  echo "helm install $HELMCHART"
+  #Update policy name in ingress.yaml
+  sed -i "s/annotations:/&\n    openappsec.io\/policy: open-appsec-best-practice-policy/" ingress.yaml
+else
+  #Update policy name in ingress.yaml
+  policyname=$(yq e 'select(.kind == "Policy").metadata.name' open-appsec-policy.yaml)
+  sed -i "s/annotations:/&\n    openappsec.io\/policy: $policyname/" ingress.yaml
+  echo "kubectl apply -f open-appsec-policy.yaml"
+fi
 echo ""
 
 while [ 1 ]
@@ -148,9 +158,16 @@ do
       echo "Applying ingress.yaml..."
       kubectl apply -f ingress.yaml
       sleep 10
-      echo "Applying open-appsec-policy.yaml..."
-      kubectl apply -f open-appsec-policy.yaml
+      if test -f "$HELMCHART";
+      then
+         echo "Installing $HELMCHART..."
+         helm install open-appsec-helm $HELMCHART
+      else
+        echo "Applying open-appsec-policy.yaml..."
+        kubectl apply -f open-appsec-policy.yaml
+      fi
       break
+      sleep 10
     elif [ "$input" == "no" ];
     then
       echo "$(date) $uuid user asked not to run commands" >> open-appsec-k8s-install.log
