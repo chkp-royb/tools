@@ -119,9 +119,7 @@ echo ""
 echo ">> Policy (step 2 of 3)"
 echo "You can use the default policy or change it."
 
-./open-appsec --config $prevent
-
-
+./open-appsec --config $prevent --cloud
 
 HELMCHART=./open-appsec-policy-helm.tgz
 
