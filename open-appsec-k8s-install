@@ -154,7 +154,7 @@ do
       echo "$(date) $uuid user asked to run commands" >> open-appsec-k8s-install.log
       echo "Installing open-appsec helm. It will take about 40 seconds for everything to load..."
       helm install cp-k8s-appsec-nginx-ingress-4.1.4.tgz --name-template cp-appsec -n $namespace --create-namespace --set appsec.mode=stand-alone  --set appsec.persistence.enabled=false --set controller.ingressClassResource.name="appsec-nginx" --set controller.ingressClassResource.controllerValue="k8s.io/appsec-nginx"
-      sleep 40
+      sleep 60
       echo "Applying ingress.yaml..."
       kubectl apply -f ingress.yaml
       sleep 10
