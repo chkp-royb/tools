@@ -166,8 +166,8 @@ do
         echo "Applying open-appsec-policy.yaml..."
         kubectl apply -f open-appsec-policy.yaml
       fi
-      break
       sleep 10
+      break
     elif [ "$input" == "no" ];
     then
       echo "$(date) $uuid user asked not to run commands" >> open-appsec-k8s-install.log
